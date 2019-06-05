@@ -52,3 +52,6 @@ This directory contains the following files.
 - `src/mySet.ml`: The implementation of the ADT for a set.
 - `src/typing.ml`: The implementation of MiniML type inference (to be
   implemented by students.)
+
+- `test/dune`: The config file of `dune runtest`. 
+  - After implementing the exercises, remove the corresponding symbol `;`.
