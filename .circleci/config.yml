@@ -1,0 +1,20 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: suginamiku/le3sw:latest
+    branches:
+      only:
+        - master
+    steps:
+      - checkout
+      - run:
+          name: Build
+          command: |
+            eval $(opam env)
+            dune build
+      - run:
+          name: Test
+          command: |
+            eval $(opam env)
+            dune runtest
