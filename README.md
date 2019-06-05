@@ -29,9 +29,9 @@ useful libraries with opam.
 
 Software written in OCaml
 
-- Type `dune build --profile=` to build.
-- Type `dune exec miniml --profile=` to invoke the interpreter.
-- Type `dune runtest --profile=` to run tests
+- Type `dune build` to build.
+- Type `dune exec miniml` to invoke the interpreter.
+- Type `dune runtest` to run tests
 
 
 ## Files
@@ -39,27 +39,16 @@ Software written in OCaml
 This directory contains the following files.
 
 - `main.ml`: The entry point of the entire interpreter.
-- `syntax.ml`: Definition of the type for MiniML abstract syntax trees.
-- `eval.ml`: The functions that evaluate MiniML expressions/declarations.
-- `parser.mly`: The definition of the MiniML parser.
-- `lexer.mll`: The definition of the MiniML lexer.
-- `environment.mli`: The interface of the ADT (abstract data type) for
+- `cui.ml`: The function of the CUI.
+- `src/syntax.ml`: Definition of the type for MiniML abstract syntax trees.
+- `src/eval.ml`: The functions that evaluate MiniML expressions/declarations.
+- `src/parser.mly`: The definition of the MiniML parser.
+- `src/lexer.mll`: The definition of the MiniML lexer.
+- `src/environment.mli`: The interface of the ADT (abstract data type) for
   an environment -- an important data structure often used in
   interpreters and compilers.
-- `environment.ml`: The implementation of the ADT for an environment.
-- `mySet.mli`: The interface of the ADT for a set.
-- `mySet.ml`: The implementation of the ADT for a set.
-- `typing.ml`: The implementation of MiniML type inference (to be
+- `src/environment.ml`: The implementation of the ADT for an environment.
+- `src/mySet.mli`: The interface of the ADT for a set.
+- `src/mySet.ml`: The implementation of the ADT for a set.
+- `src/typing.ml`: The implementation of MiniML type inference (to be
   implemented by students.)
-- `Makefile`: Makefile interpreted by `make`.
-- `OCamlMakefile`: A skelton of a makefile for an OCaml project
-  provided by ocaml-makefile
-  (http://mmottl.github.io/ocaml-makefile/).
-
-After typing `make`, the OCaml compiler generates many intermediate
-files. Important files among them are following.
-
-- `parser.automaton`: Description of the LR(1) automaton generated
-  from `parser.mly`. If you encounter a conflict(s) after customizing
-  the parser, read this file carefully (and think how you should
-  correct your parser).
