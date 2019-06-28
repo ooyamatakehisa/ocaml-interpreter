@@ -1,0 +1,10 @@
+lib: [
+  "_build/install/default/lib/miniml/META" {"META"}
+  "_build/install/default/lib/miniml/opam" {"opam"}
+]
+bin: [
+  "_build/install/default/bin/miniml" {"miniml"}
+]
+doc: [
+  "_build/install/default/doc/miniml/README.md"
+]
