@@ -106,11 +106,6 @@ and eval_decl env = function
       let v = eval_exp firstenv e in
       let (x ,newenv,newv) = eval_decl firstenv top in
       (x,(Environment.extend id v newenv),newv)    
-    (* | LetAndExp(id,e1,e2) -> 
-      let firstenv = env in
-      let v1 = eval_exp firstenv e1 in
-      let v2 = eval_exp firstenv e2 in
-      (id,(Environment.extend id v1 env ),v2)     *)
     | LetAndRecExp(id,e,top) -> 
       let firstenv = env in
       let v = eval_exp firstenv e in

@@ -8,6 +8,8 @@ type exp =
   | ILit of int
   | BLit of bool
   | BinOp of binOp * exp * exp
+  | MidPlus
+  | MidMult
   | IfExp of exp * exp * exp
   | LetExp of id * exp * exp
 

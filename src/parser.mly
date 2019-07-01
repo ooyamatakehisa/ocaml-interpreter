@@ -10,7 +10,7 @@ open Syntax
 %token LET IN EQ LETAND
 
 /* (ML3)add */
-%token RARROW FUN DFUN
+%token RARROW FUN DFUN MIDFUN
 
 %token REC
 
@@ -87,15 +87,23 @@ PExpr :
  /* (ML3)instead above one */
  MExpr : 
     e1=MExpr MULT e2=AppExpr { BinOp (Mult, e1, e2) } 
+    e1=MExpr MULT e2=MidAppExpr { BinOp (Mult, e1, e2) } 
   | e=AppExpr { e }
 
+
+ 
 
 
  FunExpr :
   FUN e1=ID RARROW e2=Expr { FunExp (e1, e2) } 
+  | LPAREN PLUS RPAREN { MidPlus }
+  | LPAREN MULT RPAREN { MidMult }
 
  DFunExpr :
   DFUN e1=ID RARROW e2=Expr { DFunExp (e1, e2) } 
+
+
+
 
 
  AExpr :
@@ -109,6 +117,9 @@ PExpr :
 AppExpr : 
   e1=AppExpr e2=AExpr { AppExp (e1, e2) } 
   | e=AExpr { e } 
+
+MidAppExpr :
+  PLUS 
 
 
 IfExpr :

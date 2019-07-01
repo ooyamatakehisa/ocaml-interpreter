@@ -19,6 +19,7 @@ let reservedWords = [
   ("rec", Parser.REC);
 
   ("and", Parser.LETAND);
+
 ]
 }
 
