@@ -56,7 +56,7 @@ rule main = parse
      }
 | eof { exit 0 }
 
-
+(* コメント専用のルール引数を取ることで入れ子構造を可能にしている。 *)
 and comment n = parse
  "*)" {if n = 0 then main lexbuf else comment (n-1) lexbuf}
 | "(*" {comment (n+1) lexbuf }

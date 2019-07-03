@@ -44,7 +44,7 @@
 
 \subsection{Exercise3.2.3}
     論理値演算のための二項演算子 &&, || を追加せよ． \\\\
-    まずparserにおいて他の加算や乗算と同様にANDとORのtokenを宣言する。次にこれらの表現を定義するANDExprとORExprを実装する。
+    まずparser.mlyにおいて他の加算や乗算と同様にANDとORのtokenを宣言する。次にこれらの表現を定義するANDExprとORExprを実装する。
     ここで注意が必要なのが演算子&&と||において&&のほうが優先順位が高いためORExprがANDExprを内包するような形で定義する。
     そして&&より比較演算子のほうが演算適用優先順位が高いため比較演算を表すLTExprをANDExprが内包するように書く。
     syntax.mlでは抽象構文木のデータ型を定義する。&&と||に関してはすでに定義されているヴァリアント型BinOpにorとandの型を付加する。
@@ -57,7 +57,7 @@
     ここでこのケースに対応しない場合、未定義のundef型が評価されてしまいundefがunbound valueとしてエラーが出てしまう。
     こうすることで&&と||の実装が完了した。
     
-\subsection{Exercise3.2.3}
+\subsection{Exercise3.2.4}
     lexer.mllを改造し，(*と*)で囲まれたコメントを読み飛ばすよう にせよ．\\\\
     これはlexerを変えるだけで実装が終わる。
     字句解析においてmainルールで(*が現れた時はヒントにあるように新たに自分でcommentルールを定義しそこに飛ぶようにする。
@@ -70,20 +70,112 @@
 
 
 \subsection{Exercise3.3.1}
-    ML2 インタプリタを作成し，テストせよ．\\
+    ML2 インタプリタを作成し，テストせよ．\\\\
     与えられたコードを所定の一にコピーアンドペーストすれば実行できる。プログラムの説明はコード内に記す。
 
 \subsection{Exercise3.3.2}
+    OCaml では，let宣言の列を一度に入力することができる．この機能 を実装せよ．\\\\
     parser.mlyの文法規則toplevelのなかに LET\ x=ID\ EQ\ e=Expr\ top=toplevel\ {VarDecl(x,e,top)}を追加する。
     こうすることで上で追加した文法規則のtoplevelの部分が文法規則toplevelの中で
     別に定義されている文法規則LET\ x=ID\ EQ \e=Expr\ SEMISEMI\ { Decl (x, e) }を呼び出すことができ、
     let\ a\ =\ 3\ let\ b\ =\ 4;;のような定義もすることができるようになる。
     ここでLET\ x=ID\ EQ\ e=Expr\ top=toplevel\ {VarDecl(x,e,top)}のように書いてしまうことで
-    parser上では
+    構文解析ではlet\ a\ =\ 3\ 5やlet\ b\ =\ 4\ trueのような表現も通ってしまうがeval.mlでの構文木解釈時にエラーを出力するので実用上は問題ない。
+    この 新たに追加した文法規則のデータ型をprogram型のVarDeclとしてid型、exp型、program型の値の情報を持つようにsyntax.mlで定義する。
+    eval.mlの解釈部においてはeval_declでこの宣言を評価できるようにする。
+    VarDeclとともにVarDecl (id ,e, top)のtopの部分もprogram型なのでまずexp型のeをeval_expで評価してその値をidで束縛し環境に追加、
+    その更新された環境で再び再帰的にeval_declを呼び出してtopを評価する。
+    こうすることでlet\ a\ =\ 3\ let\ b\ =\ 4;;のような式が正しく評価される。
+
+\subsection{Exercise3.3.4}
+    and を使って変数を同時にふたつ以上宣言できるように let 式・宣言 を拡張せよ．\\\\
+    exercise3.3.2のようにletを２つ連続で並べるだけの時はひとつ目の宣言を環境に追加してよかったため簡単だったが今回は
+    andで結ばれた宣言は直前の宣言の束縛を参照しないようにする必要があり、さらにandで結ばれたすべての宣言が終わったあとにそれら一連の宣言の
+    変数の束縛を環境に追加する必要がある。またこの問では宣言と同時にinも用いれるようにする必要があるため、parser.mlyでの文法規則の定義も難しかった。
+    まずparser.mlyにおいてin以下のないlet and letのみの宣言の文法規則をtoplevelの下に追加する。
+    これはLET\ x=ID\ EQ\ e1=Expr\ LETAND\ e2=LetAndExpr\ SEMISEMI\ { LetAndDecl(x, e1, e2) }のように宣言する。
+    このデータ型LetAndDecl (x, e1, e2)はsyntax.mlでid型、exp型、program型の値を持つprogram型の中のLetAndDecl型として定義する。
+    また上の追加した文法規則の中のLetAndExprは新たに定義した文法規則でありこのlet\ -\ and\ let\ -\ の文を実現する文法規則を定義する。
+    次にlet andの式にinがついた文のための文法規則をLetAndInExp :\ LET\ x=ID\ EQ\ e1=Expr\ LETAND\ e2=LetAndExpr\ IN\ e3=Expr\ { LetAndInExp((LetAndRecExp(x,e1,e2)),e3) }
+    として定義する。上と同様にLetAndInExpをprogram型とexp型の値を持つexp型のデータ型としてsyntax.mlで定義する。
+    これらで定義した構文をeval.mlで解釈する。まずLetAndDeclはprogram型なのでeval_decl関数の中で最初のlet文を評価し変数の束縛を実行するが、その束縛は環境には加えず
+    最初の与えられた環境でふたつ目のand以下のlet宣言を再帰的に再びeval_declで評価する。この評価で返ってきた環境に最後に最初のlet宣言の束縛を加える。
+    こうすることで各々のlet宣言は互いの宣言の束縛に影響を与えずに評価できなおかつ最後にそれらの宣言の束縛を環境に追加することができる。
+    LetAndInExp((LetAndRecExp(x,e1,e2)),e3)の評価についてはこれはexp型なのでeval_exp関数で評価を行うがこの LetAndInExp型がもつひとつ目のデータ型LetAndRecExp(x,e1,e2)
+    はeval_declで評価しそこで返された環境の中でe3をeval_exp関数で再帰的に評価する。
+    結局eval_decl関数の中でもeval_exp関数を呼び出しeval_exp関数の中でもeval_decl関数を呼び出しているため相互再帰となっているがこうすることで
+    let\ a=1\ and b=2\ in\ a+bのような式を実現できる。
+    
+
+
+\subsection{Exercise3.4.1}
+    ML3 インタプリタを作成し，高階関数が正しく動作するかなどを含めてテ ストせよ．\\\\
+    まずは資料のコードをコピーするが、parser.mlyにおいて文法規則FunExprが未定義なので自分で定義する必要がある。
+    function文はfun\ x\ ->\ x+1のようなかたで書かれるのでFunExprは\ FUN\ e1=ID\ RARROW\ e2=Expr\ { FunExp (e1, e2) }のような形で定義できる。
+    それ以外はすでにテキストのコード内で実装済みである。
+
+\subsection{Exercise3.4.2}
+    OCaml での「(中置演算子) 」記法をサポートし，プリミティブ演算 を通常の関数と同様に扱えるようにせよ.\\\\
+    問題分例文から(+)のような文字列を関数として認識する必要があることが読み取れる。
+    つまりこの構文が来たらProcV(_,_,_)を返す必要があるとわかる。
+    実装についはまずここまでの問と同様にしてParser.mlyで文法規則\ LPAREN\ PLUS\ RPAREN\  { MidPlusExp }と
+    \ LPAREN\ MULT\ RPAREN\  { MidMultExp }をAExprに追加する。こうすることでこの(*)などを関数として扱った際にこの表現も普通の関数と同様にAppExprで
+    適用できるようになる。次にこのMidMultExpとMidPlusExpをexp型のデータ型としてsyntax.mlで定義する。
+    最後にeval.mlでeval_expの引数がこの型の時に引数を持ちその和（積）を返す関数をProcV型で返すようにする。
+    実際には適当にidを"x"としてProcVのidとし、この関数閉包ボディの部分は引数yでx+yを返すファンクションとして記した。
+    このようにすることで実装が完了する。
+
+\subsection{Exercise3.4.4}
+    加算を繰り返して 4 による掛け算を実現しているML3 プログ ラムを改造して，階乗を計算するプログラムを書け．\\\\
+    let\ makemult\ =\ fun\ maker\ ->\ fun\ x\ ->\\ 
+    \ \ if\ x < 1\ then\ 0 \\
+    \ \ else\ x*(maker\ maker\ (x\ +\ -1))\ in\\ 
+    let\ times4\ =\ fun\ x\ ->\ makemult\ makemult\ x\ in\\ 
+    times4\ 3\\
+    もとの4の掛け算を実行するプログラムがtimes4の引数の数だけmakemult\ makemult\ aを呼び出してそのたびに4を加算していくために
+    4の乗算が実行されていたことを理解すると、4を加算していた部分のかわりに引数の値を乗算すればいいことがわかる。
+    そうすることで引数の回数だけ再帰的に関数が呼びだされ階乗が計算される。
+
+\subsection{Exercise3.4.5}
+    インタプリタを改造し， fun の代わりに dfun を使った関数は動的束縛を行うようにせよ．\\\\
+    funとdfunで実装が違う部分は解釈部のeval.expだけなのでparser.mlyとsyntax.mlはfunの実装と同様にするだけで良い。
+    dfunの評価については関数が宣言された際の環境の情報を保持しておく必要がないので新たに環境の情報を保持しない環境閉包DprocVをeval.mlで定義し
+    DFunExp (e1, e2)をeval_expで評価するときはDProcVを返す。関数適用時はAppExp(exp1,exp2)のなかでexp1がProxVの場合とDProcVの場合でパターンマッチを行い
+    DProcV(id,body)の時はidをexp2の評価結果で束縛しこの関数適用が呼びだされた時の環境を拡張してbodyを評価する。
+    以上でこのdfunの実装は完了する。
+    
+\subsection{Exercise3.4.6}
+    以 下のプログラムで， 二箇所の funを dfun (Exercise3.4.5を参照)に置き換えて(4通りのプ ログラムを)実行し，その結果について説明せよ．\\\\
+
+    let\ fact\ =\ fun\ n\ ->\ n + 1\ in\ let\ fact\ =\ fun\ n\ ->\ if\ n < 1\ then\ 1\ else\ n * fact (n + -1)\ in\ fact\ 5\\
+    val\ -\ =\ 25\\
+    最後fact\ 5が呼び出されると直前のfactが5に適用されるが、関数閉包ProcV(id,body,env)のidを5で束縛しbodyを評価する際、このbody内のfactは
+    この関数宣言時の環境にあったlet\ fact\ =\ fun\ n\ →\ n + 1を参照するため5*5が行われ25という結果が出力される。\\\\ 
+
+    let\ fact\ =\ dfun\ n\ ->\ n + 1\ in\ let\ fact\ =\ fun\ n\ ->\ if\ n < 1\ then\ 1\ else\ n * fact (n + -1)\ in\ fact\ 5\\
+    val\ -\ =\ 25\\
+    上のプログラムと違い、ひとつ目のfactの宣言がdfunになったがこのfact関数はこれが宣言された時の環境に依存しない関数なので
+    この変更はひとつ目のプログラムに変化を与えない。\\\\ 
+
+    let\ fact\ =\ fun\ n\ ->\ n + 1\ in\ let\ fact\ =\ dfun\ n\ ->\ if\ n < 1\ then\ 1\ else\ n * fact (n + -1)\ in\ fact\ 5\\
+    val\ -\ =\ 120\\
+    最後fact\ 5が呼び出されると直前のfactが5に適用されるが、ふたつ目のfactはdfunで宣言されているためその関数閉包DProcV(id,body)は宣言時の環境の情報を保持しない。
+    したがってこの関数閉包のidを5で束縛しbodyを評価する際の環境には評価時の環境が適用されるため、このbody内のfactは現在のfactが再帰的に呼びだされ
+    階乗を計算できるようになる。\\\\ 
+
+    let\ fact\ =\ dfun\ n\ ->\ n + 1\ in\ let\ fact\ =\ dfun\ n\ ->\ if\ n < 1\ then\ 1\ else\ n * fact (n + -1)\ in\ fact\ 5\\
+    val\ -\ =\ 120\\
+    ふたつ目のプログラムと同様でひとつ目のfactの宣言のdfun化は出力に影響を及ぼさない。
 
 
 
 
-  
+\subsection{Exercise3.5.1}
+    まずlexer.mllの予約語のところにRECを追加する。次にparser.mlyにおいてまずtokenとしてRECを宣言する。toplevelのところにlet\ recの宣言の文法規則
+    LET\ REC\ f=ID\ EQ\ FUN\ x=ID\ RARROW\ e=Expr\ SEMISEMI\ {RecDecl(f,x,e)}を追加する。また宣言以外で用いいられるlet\ recとして
+    LetExprのなかにもLET\ REC\ x=ID\ EQ\ FUN\ y=ID\ RARROW\ e1=Expr\ IN\ e2=Expr\ { LetRecExp (x, y, e1, e2) }の文法規則を追加する。
+    eval_expは資料中のコードで実装済みであるので最後にeval_declの引数がRecDecl(f,x,e)の場合を実装する。これはeval_expとほぼ同じで
+    最後に宣言された再帰関数の識別子とあらたにこの関数の情報を加えた環境とこの関数閉包を返せばよい。
+    以上で再帰関数の実装は終了する。
 
 \end{ducument}

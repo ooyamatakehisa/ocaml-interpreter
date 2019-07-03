@@ -87,7 +87,6 @@ PExpr :
  /* (ML3)instead above one */
  MExpr : 
     e1=MExpr MULT e2=AppExpr { BinOp (Mult, e1, e2) } 
-    e1=MExpr MULT e2=MidAppExpr { BinOp (Mult, e1, e2) } 
   | e=AppExpr { e }
 
 
@@ -96,13 +95,10 @@ PExpr :
 
  FunExpr :
   FUN e1=ID RARROW e2=Expr { FunExp (e1, e2) } 
-  | LPAREN PLUS RPAREN { MidPlus }
-  | LPAREN MULT RPAREN { MidMult }
 
+ 
  DFunExpr :
   DFUN e1=ID RARROW e2=Expr { DFunExp (e1, e2) } 
-
-
 
 
 
@@ -112,14 +108,17 @@ PExpr :
   | FALSE  { BLit false }
   | i=ID   { Var i }
   | LPAREN e=Expr RPAREN { e }
+  | LPAREN PLUS RPAREN  { MidPlusExp }
+  | LPAREN MULT RPAREN  { MidMultExp }
 
   /* (ML3)add */
 AppExpr : 
   e1=AppExpr e2=AExpr { AppExp (e1, e2) } 
   | e=AExpr { e } 
+  /* | e=MidFunExpr { e } */
 
-MidAppExpr :
-  PLUS 
+
+  
 
 
 IfExpr :
