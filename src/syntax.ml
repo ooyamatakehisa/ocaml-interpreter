@@ -8,13 +8,13 @@ type exp =
   | ILit of int
   | BLit of bool
   | BinOp of binOp * exp * exp
-  | MidPlusExp 
-  | MidMultExp 
+  | MidPlusExp
+  | MidMultExp
   | IfExp of exp * exp * exp
   | LetExp of id * exp * exp
 
   (* (ML3)add *)
-  | FunExp of id * exp 
+  | FunExp of id * exp
   | DFunExp of id * exp
   | AppExp of exp * exp
 
@@ -22,22 +22,22 @@ type exp =
   | LetRecExp of id * id * exp * exp
   | LetAndInExp of program * exp
 
-  | ListContAeExp of exp * exp
+  (* | ListContAeExp of exp * exp
   | ListContLiExp of exp * exp
-  | NilExp
+  | NilExp *)
 
 
 
 
 and program =
     Exp of exp
-    | Decl of id * exp 
-    | RecDecl of id * id * exp 
+    | Decl of id * exp
+    | RecDecl of id * id * exp
     | VarDecl of id * exp * program
     | LetAndDecl of id * exp * program
     | LetAndRecExp of id * exp * program
     | LetOneExp of id * exp
-    
+
 
 type tyvar = int
 type ty =
