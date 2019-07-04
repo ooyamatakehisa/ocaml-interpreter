@@ -162,7 +162,6 @@ and eval_decl env decl= match decl with
       else
       (* もしそうでなければ再びリストaに宣言された識別子を追加 *)
       a := id::(!a) ;
-      以下の評価は
       let firstenv = env in
       let v = eval_exp firstenv e in
       let (x ,newenv,newv) = eval_decl firstenv top in
