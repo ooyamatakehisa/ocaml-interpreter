@@ -35,10 +35,10 @@ toplevel :
 
 
 Expr :
-  
+
   /* (ML2)add */
   | e=LetExpr { e }
-  
+
   /* (ML3)add  */
   | e=FunExpr { e }
   | e=DFunExpr { e }
@@ -65,13 +65,13 @@ LetAndExpr :
 
 
 ORExpr :
-   l=ANDExpr OR r=ANDExpr { BinOp (Or,l,r) }
+   l=ANDExpr OR r=ORExpr { BinOp (Or,l,r) }
   /* | l=AExpr OR r=ORExpr { BinOp (Or,l,r) }
   | l=ORExpr OR r=AExpr { BinOp (Or,l,r) } */
   | e=ANDExpr { e }
 
 ANDExpr :
-   l=LTExpr AND r=LTExpr { BinOp (And,l,r) }
+   l=LTExpr AND r=ANDExpr { BinOp (And,l,r) }
   /* | l=LTExpr AND r=AExpr { BinOp (And,l,r) }
   | l=AExpr AND r=LTExpr { BinOp (And,l,r) }
   | l=LTExpr AND r=LTExpr { BinOp (And,l,r) } */
