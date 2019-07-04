@@ -34,12 +34,11 @@ toplevel :
 
 
 
-
 Expr :
-    e=IfExpr { e }
+  
   /* (ML2)add */
   | e=LetExpr { e }
-  | e=LTExpr { e }
+  
   /* (ML3)add  */
   | e=FunExpr { e }
   | e=DFunExpr { e }
@@ -66,16 +65,16 @@ LetAndExpr :
 
 
 ORExpr :
-   l=AExpr OR r=AExpr { BinOp (Or,l,r) }
-  | l=AExpr OR r=ORExpr { BinOp (Or,l,r) }
-  | l=ORExpr OR r=AExpr { BinOp (Or,l,r) }
+   l=ANDExpr OR r=ANDExpr { BinOp (Or,l,r) }
+  /* | l=AExpr OR r=ORExpr { BinOp (Or,l,r) }
+  | l=ORExpr OR r=AExpr { BinOp (Or,l,r) } */
   | e=ANDExpr { e }
 
 ANDExpr :
-   l=AExpr AND r=AExpr { BinOp (And,l,r) }
-  | l=LTExpr AND r=AExpr { BinOp (And,l,r) }
+   l=LTExpr AND r=LTExpr { BinOp (And,l,r) }
+  /* | l=LTExpr AND r=AExpr { BinOp (And,l,r) }
   | l=AExpr AND r=LTExpr { BinOp (And,l,r) }
-  | l=LTExpr AND r=LTExpr { BinOp (And,l,r) }
+  | l=LTExpr AND r=LTExpr { BinOp (And,l,r) } */
   | e=LTExpr { e }
 
 LTExpr :
@@ -120,15 +119,13 @@ AExpr :
 | LPAREN e=Expr RPAREN { e }
 | LPAREN PLUS RPAREN  { MidPlusExp }
 | LPAREN MULT RPAREN  { MidMultExp }
+| e=IfExpr { e }
+
 
   /* (ML3)add */
 AppExpr :
   e1=AppExpr e2=AExpr { AppExp (e1, e2) }
   | e=AExpr { e }
-
-
-
-
 
 
 IfExpr :

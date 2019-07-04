@@ -47,11 +47,30 @@ type ty =
   | TyFun of ty * ty
   | TyList of ty
 
-let freevar_ty _ =
-  assert false (* Exercise 4.3.1 *)
+let fresh_tyvar = 
+  let counter = ref 0 in 
+  let body () = 
+    let v = !counter in 
+    counter := v + 1; v 
+  in body
 
-let string_of_ty _ =
-  assert false (* Exercise 4.3.1 *)
+let rec freevar_ty ty = 
+  let lst = MySet.empty in 
+  match ty with
+  TyFun(ty1,ty2) -> 
+    (* let a = MySet.union (freevar_ty ty1) lst in *)
+    MySet.union (freevar_ty ty2) (freevar_ty ty1)
+  | TyVar a -> MySet.insert a lst
+  | _ -> lst 
+ 
 
-let pp_ty ty =
-  print_string (string_of_ty ty)
+let rec string_of_ty =  function
+    TyInt  ->  "int"
+  | TyBool ->  "bool"
+  | TyFun(a,b) -> "(" ^ (string_of_ty a)^ "->" ^ (string_of_ty b) ^ ")"
+  | TyVar a -> "'" ^ Char.escaped(char_of_int (a+97))
+
+let pp_ty  =  function 
+  TyInt -> print_string "int" 
+  | TyBool -> print_string "bool" 
+  (* print_string (string_of_ty ty) *)
