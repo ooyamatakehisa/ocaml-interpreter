@@ -3,6 +3,7 @@ open Syntax
 %}
 
 %token LPAREN RPAREN SEMISEMI
+%token LBRACKETS RBRACKETS COLCOL SEMI
 %token PLUS MULT LT AND OR
 %token IF THEN ELSE TRUE FALSE
 
@@ -44,6 +45,7 @@ Expr :
   | e=DFunExpr { e }
   | e=ORExpr { e } 
   | e=LetAndInExp { e }
+  | e=ListExpr{ e }
 
 LetAndInExp :
   LET x=ID EQ e1=Expr LETAND e2=LetAndExpr IN e3=Expr { LetAndInExp((LetAndRecExp(x,e1,e2)),e3) }
@@ -77,45 +79,53 @@ ANDExpr :
   | e=LTExpr { e }
 
 LTExpr :
-    l=PExpr LT r=PExpr { BinOp (Lt, l, r) }
+  l=PExpr LT r=PExpr { BinOp (Lt, l, r) }
   | e=PExpr { e }
 
 PExpr :
-    l=PExpr PLUS r=MExpr { BinOp (Plus, l, r) }
+  l=PExpr PLUS r=MExpr { BinOp (Plus, l, r) }
   | e=MExpr { e }
 
- /* (ML3)instead above one */
- MExpr : 
-    e1=MExpr MULT e2=AppExpr { BinOp (Mult, e1, e2) } 
+/* (ML3)instead above one */
+MExpr : 
+  e1=MExpr MULT e2=AppExpr { BinOp (Mult, e1, e2) } 
   | e=AppExpr { e }
 
 
- 
+ListExpr :
+  LBRACKETS e=ListContExpr RBRACKETS { e }
+  | LBRACKETS RBRACKETS { NilExp }
+
+ListContExpr:
+e1=AExpr SEMI e2=ListContExpr { ListContAeExp(e1,e2)}
+| e1=ListExpr SEMI e2=ListContExpr { ListContLiExp(e1,e2)}
+| e=AExpr { e }
+| e=ListExpr { e }
 
 
- FunExpr :
-  FUN e1=ID RARROW e2=Expr { FunExp (e1, e2) } 
-
- 
- DFunExpr :
-  DFUN e1=ID RARROW e2=Expr { DFunExp (e1, e2) } 
+FunExpr :
+FUN e1=ID RARROW e2=Expr { FunExp (e1, e2) } 
 
 
+DFunExpr :
+DFUN e1=ID RARROW e2=Expr { DFunExp (e1, e2) } 
 
- AExpr :
-    i=INTV { ILit i }
-  | TRUE   { BLit true }
-  | FALSE  { BLit false }
-  | i=ID   { Var i }
-  | LPAREN e=Expr RPAREN { e }
-  | LPAREN PLUS RPAREN  { MidPlusExp }
-  | LPAREN MULT RPAREN  { MidMultExp }
+
+
+AExpr :
+  i=INTV { ILit i }
+| TRUE   { BLit true }
+| FALSE  { BLit false }
+| i=ID   { Var i }
+| LPAREN e=Expr RPAREN { e }
+| LPAREN PLUS RPAREN  { MidPlusExp }
+| LPAREN MULT RPAREN  { MidMultExp }
 
   /* (ML3)add */
 AppExpr : 
   e1=AppExpr e2=AExpr { AppExp (e1, e2) } 
   | e=AExpr { e } 
-  /* | e=MidFunExpr { e } */
+
 
 
   

@@ -33,7 +33,11 @@ rule main = parse
 
 | "(" { Parser.LPAREN }
 | ")" { Parser.RPAREN }
+| "[" { Parser.LBRACKETS }
+| "]" { Parser.RBRACKETS }
 | ";;" { Parser.SEMISEMI }
+| "::" { Parser.COLCOL}
+| ";" { Parser.SEMI}
 | "+" { Parser.PLUS }
 | "*" { Parser.MULT }
 | "<" { Parser.LT }

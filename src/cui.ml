@@ -33,7 +33,7 @@ let rec read_eval_print env =
             (*そのxに束縛されている値を環境で探し出力*)
             pp_val (Environment.lookup x newenv); 
             print_newline();
-            (*残りのandで宣言された部分にに再帰的にこのprintrec関数を適用*) 
+            (*残りのandで宣言された部分にに再帰的にこのprintrec関数を適*) 
             printrec top;
             read_eval_print newenv
 
@@ -49,6 +49,7 @@ let rec read_eval_print env =
             (*残りのandで宣言された部分にに再帰的にこのprintrec関数を適用*) 
             printrec top;
             read_eval_print newenv
+
 
         (*decが普通の宣言のときの残りのケース*)
         |_ -> 

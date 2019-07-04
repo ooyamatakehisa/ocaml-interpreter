@@ -6,16 +6,24 @@ type exval =
   (* (ML3)add *)
   | ProcV of id * exp * dnval Environment.t ref
   | DProcV of id * exp 
+  | ConsV of exval * exval
+  | NilV
 and dnval = exval
 
 exception Error of string
 
 let err s = raise (Error s)
+let a = ref  0 
 
 (* pretty printing *)
 let rec string_of_exval = function
     IntV i -> string_of_int i
   | BoolV b -> string_of_bool b
+  | NilV -> ""
+  | ConsV(e1,e2) -> match (e1,e2) with
+   (_,NilV) -> "["^ string_of_exval e1 ^ "]" 
+   | _ ->   string_of_exval e1 ^ ";" ^  string_of_exval e2
+
 
 let pp_val v = print_string (string_of_exval v)
 
@@ -107,6 +115,16 @@ let rec eval_exp env = function
     let env' = ref env in 
     (* 適当にxとyを識別子としてx+yを返す関数を自分で作ってそれを評価結果とする。 *)
     ProcV("x",FunExp("y",(BinOp(Plus,(Var "x"),(Var "y")))),env')
+
+  | NilExp -> NilV
+  | ListContAeExp(e1,e2) -> 
+    let arg1 = eval_exp env e1 in
+    let arg2 = eval_exp env e2 in
+    ConsV(arg1,ConsV(arg2,NilV))
+  | ListContLiExp(e1,e2) -> 
+  let arg1 = eval_exp env e1 in
+  let arg2 = eval_exp env e2 in
+  ConsV(arg1,ConsV(arg2,NilV))
   
   (* 評価するexpがどれにも当てはまら買ったらエラー *)
   |_ -> err "no pattern matching"

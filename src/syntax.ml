@@ -22,6 +22,10 @@ type exp =
   | LetRecExp of id * id * exp * exp
   | LetAndInExp of program * exp
 
+  | ListContAeExp of exp * exp
+  | ListContLiExp of exp * exp
+  | NilExp
+
 
 
 
