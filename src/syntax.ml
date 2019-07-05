@@ -51,11 +51,12 @@ let fresh_tyvar =
   let counter = ref 0 in 
   let body () = 
     let v = !counter in 
-    counter := v + 1; v 
+    counter := v + 1; 
+    v 
   in body
 
 
-(* 与えられた型中の型変数の集合を返す関数 *)
+(* 与えられた型中の型変数(int)の集合を返す関数 *)
 let rec freevar_ty ty = 
   let lst = MySet.empty in 
   match ty with
@@ -64,7 +65,7 @@ let rec freevar_ty ty =
   | TyVar a -> MySet.insert a lst
   | _ -> lst 
  
-
+(* 型変数のintを引数に型変数の記号を返す関数 *)
 let char_tyvar a = 
     let c = a/26 in
     if(c=0) then 
@@ -77,8 +78,7 @@ let rec string_of_ty =  function
   | TyBool ->  "bool"
   | TyFun(a,b) -> "(" ^ (string_of_ty a)^ " -> " ^ (string_of_ty b) ^ ")"
   | TyVar a -> char_tyvar a
-
-
+  | _ -> "others"
 
 let pp_ty ty  = print_string  (string_of_ty ty )
 
