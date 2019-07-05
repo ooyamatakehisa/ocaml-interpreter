@@ -54,23 +54,32 @@ let fresh_tyvar =
     counter := v + 1; v 
   in body
 
+
+(* 与えられた型中の型変数の集合を返す関数 *)
 let rec freevar_ty ty = 
   let lst = MySet.empty in 
   match ty with
   TyFun(ty1,ty2) -> 
-    (* let a = MySet.union (freevar_ty ty1) lst in *)
     MySet.union (freevar_ty ty2) (freevar_ty ty1)
   | TyVar a -> MySet.insert a lst
   | _ -> lst 
  
 
+let char_tyvar a = 
+    let c = a/26 in
+    if(c=0) then 
+    "'" ^ Char.escaped(char_of_int (a+97-26*c)) 
+    else
+      "'" ^ Char.escaped(char_of_int (a+97-26*c)) ^ (string_of_int c)
+
 let rec string_of_ty =  function
     TyInt  ->  "int"
   | TyBool ->  "bool"
-  | TyFun(a,b) -> "(" ^ (string_of_ty a)^ "->" ^ (string_of_ty b) ^ ")"
-  | TyVar a -> "'" ^ Char.escaped(char_of_int (a+97))
+  | TyFun(a,b) -> "(" ^ (string_of_ty a)^ " -> " ^ (string_of_ty b) ^ ")"
+  | TyVar a -> char_tyvar a
 
-let pp_ty  =  function 
-  TyInt -> print_string "int" 
-  | TyBool -> print_string "bool" 
-  (* print_string (string_of_ty ty) *)
+
+
+let pp_ty ty  = print_string  (string_of_ty ty )
+
+  

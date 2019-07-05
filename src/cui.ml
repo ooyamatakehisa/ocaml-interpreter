@@ -5,7 +5,7 @@ open Syntax
 
 let rec read_eval_print env tyenv=
   print_string "# ";
-  (* flush stdout; *)
+  flush stdout;
   let back message = 
     Printf.printf "%s" message;
     print_newline();
@@ -14,7 +14,7 @@ let rec read_eval_print env tyenv=
     (*ここでtry-with文を書くことで例外処理ができる*)
     (try 
       let decl = Parser.toplevel Lexer.main (Lexing.from_channel stdin) in
-      let ty = ty_decl tyenv decl in 
+      let (s,ty) = ty_decl tyenv decl in 
       
       (*letの連続複数回宣言やletをandで結んだ宣言などの識別子の束縛値の表示のために値を出力する部分を再帰関数として定義*)
       let rec printrec dec = 

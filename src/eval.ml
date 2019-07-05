@@ -19,6 +19,7 @@ let a = ref  0
 let rec string_of_exval = function
     IntV i -> string_of_int i
   | BoolV b -> string_of_bool b
+  | ProcV(_,_,_) -> "<fun>"
   (* | NilV -> ""
   | ConsV(e1,e2) -> match (e1,e2) with
    (_,NilV) -> "["^ string_of_exval e1 ^ "]"
