@@ -90,8 +90,8 @@ MExpr :
   e1=MExpr MULT e2=AppExpr { BinOp (Mult, e1, e2) }
   | e=AppExpr { e }
 
-/*
-ListExpr :
+
+/* ListExpr :
   LBRACKETS e=ListContExpr RBRACKETS { e }
   | LBRACKETS RBRACKETS { NilExp }
 

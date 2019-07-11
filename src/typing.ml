@@ -123,6 +123,17 @@ let rec ty_exp tyenv = function
       (* 型の等式集合を単一化  *)
       let s4 = unify eqs 
       in (s4, subst_type s4 domty2)
+
+    | LetRecExp(id, para, exp1, exp2) ->
+      let domty1 = TyVar (fresh_tyvar ()) in
+      let domty2 = TyVar (fresh_tyvar ()) in       
+      let newenv1 = Environment.extend id (TyFun(domty1,domty2)) tyenv in
+      let newenv2 = (Environment.extend para domty1 newenv1)in
+      let  (s1, ty1)  = ty_exp newenv2 exp1 in
+      let  (s2, ty2)  = ty_exp newenv1 exp2 in 
+      let eqs = (eqs_of_subst s1) @ (eqs_of_subst s2) @ [(domty2,ty1)] in 
+      let s4 = unify eqs 
+      in (s4, subst_type s4 ty2) 
     | _ -> err ("Not Implemented!")
 
   

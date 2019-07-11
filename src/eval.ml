@@ -6,8 +6,8 @@ type exval =
   (* (ML3)add *)
   | ProcV of id * exp * dnval Environment.t ref
   | DProcV of id * exp
-  (* | ConsV of exval * exval
-  | NilV *)
+  | ConsV of exval * exval
+  | NilV
 and dnval = exval
 
 exception Error of string

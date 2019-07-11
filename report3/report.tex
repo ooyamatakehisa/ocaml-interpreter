@@ -37,27 +37,20 @@
     
 
 \subsection{Exercise4.3.1}
+図4.1中の pp\_ty，freevar\_ty を完成させよ．freevar\_ty は，与えられ た型中の型変数の集合を返す関数で，
+型は val\ freevar\_ty\ :\ ty\ ->\ tyvar\ MySet.t とする．型 'a MySet.t は mySet.mli で定義されている 'a を要素とする集合を表す型である．\\\\ 
     pp\_tyはstring\_of\_tyをprint\_stringしたものなのでpp\_tyの実装はlet\ pp\_ty\ ty\  =\ print\_string\  (string\_of\_ty\ ty)とするだけでよい。
-    freevar\_tyについてはその引数がどのty型であるかによってパターンマッチを行う。
+    次に与えられた型中の型変数(int)のリストを返す関数freevar\_tyについてはその引数がどのty型であるかによってパターンマッチを行う。
     引数がTyFun(a,b)の時はaとbについてそれぞれfreevar\_tyを適用して返されたリストを結合する。
     引数がTyVar\ aの時はそのままaをリストに追加して返せばいい。
    
     
 
-\subsection{Exercise3.2.3}
-    論理値演算のための二項演算子 \&\&, $\parallel$ を追加せよ． \\\\
-    まずparser.mlyにおいて他の加算や乗算と同様にANDとORのtokenを宣言する。次にこれらの表現を定義するANDExprとORExprを実装する。
-    ここで注意が必要なのが演算子\&\&と$\parallel$において\&\&のほうが優先順位が高いためORExprがANDExprを内包するような形で定義する。
-    そして\&\&より比較演算子のほうが演算適用優先順位が高いため比較演算を表すLTExprをANDExprが内包するように書く。
-    syntax.mlでは抽象構文木のデータ型を定義する。\&\&と$\parallel$に関してはすでに定義されているヴァリアント型BinOpにorとandの型を付加する。
-    最後に解釈部eval.mlで構文木を評価する。プリミティブ演算を適用する部分の関数apply\_primに変更を加える。
-    この関数の引数opがsyntaxで定義したor型かand型かまたそれ以外かをパターンマッチで場合分けし評価する。
-    ここで実際にocamlの\&\&,$\parallel$演算子を用いてこのプリミティブ演算の評価を決定する。
-    ここでテストケースのtrue$\parallel$undefもしくはfalse\&\&underはそれぞれtrueとfalseを出力するように定義する必要があるので
-    この場合に関しては関数eval\_expないで評価する。評価するexp型の値が BinOp (op, exp1, exp2)型で
-    かつそのときのopがorまたはandの時でexp1もしくはexp2がtrueもしくはfalseの時にそれぞれtrueとfalseを出力するように評価の決定を行う。
-    ここでこのケースに対応しない場合、未定義のundef型が評価されてしまいundefがunbound valueとしてエラーが出てしまう。
-    こうすることで\&\&と$\parallel$の実装が完了した。
+\subsection{Exercise4.3.2}
+型代入に関する以下の型，関数を typing.ml 中に実装せよ． type\ subst\ =\ (tyvar * ty)\ list\\
+val\ subst\_type\ :\ subst\ ->\ ty\ ->\ ty 
+    型代入をtyに適用する関数を作る。tyの型によってパターンマッチングを行う。
+    tyがTyFun(a,b)の時は
 
 \subsection{Exercise3.2.4}
     lexer.mllを改造し，(*と*)で囲まれたコメントを読み飛ばすよう にせよ．\\\\
