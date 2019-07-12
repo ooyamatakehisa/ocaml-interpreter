@@ -21,6 +21,28 @@ let rec subst_type sbst ty1 = match sbst with
     | _ -> ty1)
   | _ -> ty1
 
+  let rec freevar_tyenv tyenv =  
+    (* let freevar_onesc (id,tysc)= freevar_tysc tysc in 
+    Environment.map freevar_onesc tyenv *)
+    (* let freevar_tyenv' tyenv'=  *)
+      let lst = Environment.to_list tyenv in
+      match lst with 
+      [] -> MySet.empty
+      | (_,tysc)::tl -> MySet.union (freevar_tysc tysc) (freevar_tyenv (Environment.from_list tl))
+    (* in Environment.from_list (freevar_tyenv' tyenv) *)
+        
+
+
+  let closure ty tyenv subst = 
+  let fv_tyenv'= freevar_tyenv tyenv in
+    let fv_tyenv = 
+      MySet.bigunion 
+        (MySet.map 
+          (fun id -> freevar_ty (subst_type subst (TyVar id))) fv_tyenv') in 
+    let ids = MySet.diff (freevar_ty ty) fv_tyenv in 
+    TyScheme (MySet.to_list ids, ty)
+
+
 (* ひとつの型代入を等式集合に適用
   tyvar * ty　-> (ty * ty) list -> (ty * ty) list *)
 let rec subst_unify sub x = match x with
@@ -65,7 +87,7 @@ let rec subst_eqs s eqs = match s with
 
 
 (* Type Environment *) 
-type tyenv = ty Environment.t
+type tyenv = tysc Environment.t
 let ty_prim op ty1 ty2 = match op with 
   Plus ->  ([(ty1, TyInt); (ty2, TyInt)], TyInt) 
   | Mult -> ([(ty1, TyInt); (ty2, TyInt)], TyInt) 
@@ -75,8 +97,12 @@ let ty_prim op ty1 ty2 = match op with
   (* | Cons -> err "Not Implemented!" *)
 
 let rec ty_exp tyenv = function 
-  Var x -> (try ([],Environment.lookup x tyenv) with 
-    Environment.Not_bound -> err ("variable not bound: " ^ x)) 
+  Var x -> 
+    (try  
+      let TyScheme (vars, ty) = Environment.lookup x tyenv in 
+      let s = List.map (fun id -> (id, TyVar (fresh_tyvar ()))) vars 
+      in ([], subst_type s ty)
+      with Environment.Not_bound -> err ("variable not bound: " ^ x)) 
     | ILit _ -> ([],TyInt) 
     | BLit _ -> ([],TyBool) 
     | BinOp (op, exp1, exp2) -> 
@@ -98,7 +124,7 @@ let rec ty_exp tyenv = function
       (* let宣言のパターン *)
     | LetExp (id, exp1, exp2) -> 
       let  (s1, ty1)  = ty_exp tyenv exp1 in
-      let newenv = Environment.extend id ty1 tyenv in
+      let newenv = Environment.extend id (closure ty1 tyenv s1) tyenv in
       let  (s2, ty2)  = ty_exp newenv exp2 in 
       let eqs = (eqs_of_subst s1) @ (eqs_of_subst s2) in 
       let s4 = unify eqs 
@@ -108,7 +134,7 @@ let rec ty_exp tyenv = function
     | FunExp (id, exp) -> 
       let domty = TyVar (fresh_tyvar ()) in 
       let s, ranty = 
-        ty_exp (Environment.extend id domty tyenv) exp in 
+        ty_exp (Environment.extend id (TyScheme([],domty)) tyenv) exp in 
         (s, TyFun (subst_type s domty, ranty)) 
       
     (* 関数適用のパターン *)
@@ -127,8 +153,8 @@ let rec ty_exp tyenv = function
     | LetRecExp(id, para, exp1, exp2) ->
       let domty1 = TyVar (fresh_tyvar ()) in
       let domty2 = TyVar (fresh_tyvar ()) in       
-      let newenv1 = Environment.extend id (TyFun(domty1,domty2)) tyenv in
-      let newenv2 = (Environment.extend para domty1 newenv1)in
+      let newenv1 = Environment.extend id (TyScheme([],(TyFun(domty1,domty2)))) tyenv in
+      let newenv2 = (Environment.extend para  (TyScheme([],domty1)) newenv1)in
       let  (s1, ty1)  = ty_exp newenv2 exp1 in
       let  (s2, ty2)  = ty_exp newenv1 exp2 in 
       let eqs = (eqs_of_subst s1) @ (eqs_of_subst s2) @ [(domty2,ty1)] in 
@@ -141,9 +167,10 @@ let rec ty_exp tyenv = function
 
 
 let ty_decl tyenv = function 
-  Exp e -> ty_exp tyenv e 
-  | Decl (id, e) -> ty_exp tyenv e 
+  Exp e ->  
+    let (_, ty) = ty_exp tyenv e in 
+    (tyenv, ty) 
+  | Decl (id, e) -> 
+    let (s, ty) = ty_exp tyenv e in 
+    (Environment.extend id (closure ty tyenv s) tyenv, ty)
   | _ -> err ("Not Implemented!")
-
-
-

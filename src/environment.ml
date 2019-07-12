@@ -2,6 +2,9 @@ type 'a t = (Syntax.id * 'a) list
 
 exception Not_bound
 
+let to_list x = x
+let from_list x = x
+
 let empty = []
 let extend x v env = (x,v)::env
 

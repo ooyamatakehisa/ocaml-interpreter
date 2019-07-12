@@ -55,6 +55,9 @@ let fresh_tyvar =
     v 
   in body
 
+type tysc = TyScheme of tyvar list * ty
+let tysc_of_ty ty = TyScheme ([], ty)
+
 
 (* 与えられた型中の型変数(int)の集合を返す関数 *)
 let rec freevar_ty ty = 
@@ -64,6 +67,12 @@ let rec freevar_ty ty =
     MySet.union (freevar_ty ty2) (freevar_ty ty1)
   | TyVar a -> MySet.insert a lst
   | _ -> lst 
+
+  let freevar_tysc tysc = 
+  let TyScheme(lst,ty1) = tysc in
+  let tyvarlst = freevar_ty ty1 in
+  MySet.diff tyvarlst (MySet.from_list lst ) 
+
  
 (* 型変数のintを引数に型変数の記号を返す関数 *)
 let char_tyvar a = 

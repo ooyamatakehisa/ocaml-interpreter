@@ -7,6 +7,7 @@ let singleton x = [x]
 let from_list x = x
 let to_list x = x
 
+(* すでに要素xがリストにあったらそのままでなかったら追加する。 *)
 let rec insert x = function
     [] -> [x]
   | y::rest -> if x = y then y :: rest else y :: insert x rest
@@ -27,6 +28,7 @@ let rec map f = function
     [] -> []
   | x :: rest -> insert (f x) (map f rest)
 
+(* リストのリストを結合？ *)
 let rec bigunion = function
     [] -> []
   | set1 :: rest -> union set1 (bigunion rest)
