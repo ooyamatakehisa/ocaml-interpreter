@@ -26,162 +26,181 @@
 
     \newpage
 
-\subsection{Exercise4.2.1}
-    資料のコードをコピーし...の部分を自分で埋める。ty\_primのMultのパターンなどはPlusのパターンを参考にすれば実装できる。
-    ty\_expのIfExp (exp1, exp2, exp3)のパターンの場合はまずexp1についてty_expを再帰的に適用してその型を得て、その型がTyBoolかどうかで分岐する。
+\section{はじめに}
+  このレポートでは計算機科学実験及演習3におけるインタプリタ作成実験の型推論実装部分の演習課題に対する説明を与える。セクションは各課題ごとに分かれておりそのセクション内部ではその課題に対する設計方針と実装の詳細/工夫した点の二つの項目に分かれている。
+
+\section{Exercise4.2.1}
+\subsection{各プログラムの設計方針}
+  資料のコードをコピーし...の部分を自分で埋める。ty\_primのMultのパターンなどはPlusのパターンを参考にすれば実装できる。
+  それ以外のExpの部分も他のすでに埋めてある部分を参考にして同じような共同を示すように埋めていく。
+\subsection{実装の詳細/工夫した点}
+    ty\_expのIfExp (exp1, exp2, exp3)のパターンの場合はまずexp1についてty\_expを再帰的に適用してその型を得て、その型がTyBoolかどうかで分岐する。
     もしTyBoolでないときはこれはifの文の制約を満たさないのでエラーを返す。exp1の型がTyBoolの時はif\ A\ then\ B\ else\ Cにおける
     BとCの部分の方は一致する必要があるのでそこの型が等しくない時はエラーを返す。等しい時は上の例の式におけるBの型を返す。\\
     次にLetExp (id, exp1, exp2) の時はまずexp1の型を今までと同様にty\_primを再帰的に適用して解析し、idでこのexp1の型を束縛してtyenvを拡張する。
-    その上でexp2をty\_primによって評価する。    
+    その上でexp2をty\_primによって評価する。\\\\
 
-    
 
-\subsection{Exercise4.3.1}
-図4.1中の pp\_ty，freevar\_ty を完成させよ．freevar\_ty は，与えられ た型中の型変数の集合を返す関数で，
-型は val\ freevar\_ty\ :\ ty\ ->\ tyvar\ MySet.t とする．型 'a MySet.t は mySet.mli で定義されている 'a を要素とする集合を表す型である．\\\\ 
+
+\section{Exercise4.3.1}
+\subsection{各プログラムの設計方針}
+    図4.1中の pp\_ty，与えられ た型中の型変数の集合を返す関数で、
+    型は val\ freevar\_ty\ :\ ty\ -$>$\ tyvar\ MySet.t とする関数freevar\_ty を完成させる。freevar\_ty は型'a MySet.t は mySet.mli で定義されている'a を要素とする集合を表す型であるのでそれをもとに実装する。
+\subsection{実装の詳細/工夫した点}
     pp\_tyはstring\_of\_tyをprint\_stringしたものなのでpp\_tyの実装はlet\ pp\_ty\ ty\  =\ print\_string\  (string\_of\_ty\ ty)とするだけでよい。
     次に与えられた型中の型変数(int)のリストを返す関数freevar\_tyについてはその引数がどのty型であるかによってパターンマッチを行う。
     引数がTyFun(a,b)の時はaとbについてそれぞれfreevar\_tyを適用して返されたリストを結合する。
-    引数がTyVar\ aの時はそのままaをリストに追加して返せばいい。
-   
-    
+    引数がTyVar\ aの時はそのままaをリストに追加して返せばいい。\\\\
 
-\subsection{Exercise4.3.2}
-型代入に関する以下の型，関数を typing.ml 中に実装せよ． type\ subst\ =\ (tyvar * ty)\ list\\
-val\ subst\_type\ :\ subst\ ->\ ty\ ->\ ty 
+
+
+\section{Exercise4.3.2}
+\subsection{各プログラムの設計方針}
+  型代入に関するtype\ subst\ =\ (tyvar * ty)\ list型、型代入(のリスト)をひとつの型に適用するval\ subst\_type\ :\ subst\ $->$\ ty\ ->\ ty型の関数を typing.ml 中に実装する。
+
+\subsection{実装の詳細/工夫した点}
     型代入をtyに適用する関数を作る。tyの型によってパターンマッチングを行う。
-    tyがTyFun(a,b)の時は
-
-\subsection{Exercise3.2.4}
-    lexer.mllを改造し，(*と*)で囲まれたコメントを読み飛ばすよう にせよ．\\\\
-    これはlexerを変えるだけで実装が終わる。
-    字句解析においてmainルールで(*が現れた時はヒントにあるように新たに自分でcommentルールを定義しそこに飛ぶようにする。
-    ここでこの字句解析のルールは引数を取ることができ、はじめこのcommentルールに飛んだ時はその引数を0とする。
-    このcommentルール内でさらに字句"(*"が現れた時はcomment\ 1を呼び出す。
-    このようにコメント内で(*が現れるたびに引数を一つ大きくしたcommentルールを再帰的に呼び出す。
-    逆に*)が現れた時はそのときの引数-1した引数のcommentルールを呼び出しその引数-1が0になったときにもとのmainルールに戻るように定義する。
+    tyがTyFun(a,b)の時はこのaとbに再帰的にsubst\_typeを適用しその結果返されたリストをunionを用いて結合する。\\
+    TyVar\ thetaのときはまず型代入の1つ目(型代入をhd::tlとしたときにhdの部分)の型変数alphaがこのthataと一致するときはこのTyVar\ thetaを型代入の一つ目の型変数alphaに対応する型で置き換えてそのTyVar\ (thetaをalphaに対応する型で置き換えた型)に再び型代入の残りのリストをsubst\_typeを用いて再帰的にこの関数を適用する。このthetaが型代入の一つ目の型変数alphaと異なる場合はその型に残りの型代入tlを再帰的に適用する。\\
+    パターンマッチにおける型がTyFunでもTyVarでもない時は型代入を適用する部分はないのでそのまま与えられた型を返すように実装する。\\\\
 
 
+\section{Exercise4.3.3}
+\subsection{各プログラムの設計方針}
+  資料内の単一化に関する部分を読み実装する。そのアルゴリズムについては詳細がすでに書かれているので基本的にはその方針に沿って実装していけばいい。単一化の関数の型はval\ unify\ :\ (ty * ty)\ list\ -$>$\ substである。
 
+\subsection{実装の詳細/工夫した点}
+  まず単一化を適用したい型の等式集合でパターンマッチを行いその型の等式集合が空リストの場合はそのまま空リストを返す。つぎにその型の等式集合が(ty1,ty2)::tlのようにかける時、つまり型の等式集合の一つ目の要素が(ty1,ty2)で残りの要素の集合がtlの時は以下の手順を実行する。\\
+  まずty1とty2が既に等しい時は何もする必要がないので残りの型の等式集合の部分tlに再び再帰的にこの単一化の関数unifyを適用する。そうでないときはこの(ty1,ty2)でパターンマッチを行う。
+  \begin{itemize}
+    \item(ty1,ty2)が(TyFun(ty1,ty2),TyFun(ty3,ty4))の時はこのファンクションの引数の部分と式部分の型がそれぞれ一致する必要があるので(ty1,ty3)と(ty2,ty4)という等式集合を残りの等式集合tlに追加して再びこれにunifyを適用する。
+    \item(ty1,ty2)が((TyVar\ a),ty)の時はtyに含まれる型変数にこのaが含まれているときはエラーを返し、含まれていないときは残りの型の等式集合tlにこの型代代入(a,ty)を適用してその等式集合に再びこの関数を適用する。ここで、型代入（のリスト）を一つの型に適用する関数subst\_typeは既に定義したが今回は一つの型代入を型の等式集合に適用したいので新しくsubst\_unifyという関数を定義する。これは今書いたように一つの型代入を型の等式集合に適用する関数でありsubst\_typeを使うように工夫することで簡単に定義できる。このように型代入を残りの等式集合tlに適用したものに再びunifyを適用した結果返ってくる型代入（のリスト）に今の型代入(a,ty)を追加する。
+    \item(ty1,ty2)が(ty,TyVar a)の時は上の場合と逆のことを行えばいい。
+    \item(ty1,ty2)が上記のいずれでもないときはエラーを返す。
+  \end{itemize}
+  以上が単一化のアルゴリズムの実装方式である。
+\\\\
 
-\subsection{Exercise3.3.1}
-    ML2 インタプリタを作成し，テストせよ．\\\\
-    与えられたコードを所定の一にコピーアンドペーストすれば実行できる。プログラムの説明はコード内に記す。
+\section{Exercise4.3.4}
+単一化アルゴリズムにおいて，α !∈ FTV(τ) という条件の必要性を考える。たとえば型の等式集合の要素として(α,α-$>$α)のようなものがあった際これはα∈FTV(τ)であり、\\α=α-$>$α= (α-$>$α)-$>$(α-$>$α)=$\cdot\cdot\cdot$のようにこの型の等式集合を解こうとすると無限ループしてしまう。したがってこのようにτに型変数αは含まれないという制約を付ける必要がある。
+\\\\
 
-\subsection{Exercise3.3.2}
-    OCaml では，let宣言の列を一度に入力することができる．この機能 を実装せよ．\\\\
-    parser.mlyの文法規則toplevelのなかに LET\ x=ID\ EQ\ e=Expr\ top=toplevel\ \{VarDecl(x,e,top)\}を追加する。
-    こうすることで上で追加した文法規則のtoplevelの部分が文法規則toplevelの中で
-    別に定義されている文法規則LET\ x=ID\ EQ \ e=Expr\ SEMISEMI\ \{ Decl (x, e) \}を呼び出すことができ、
-    let\ a\ =\ 3\ let\ b\ =\ 4;;のような定義もすることができるようになる。
-    ここでLET\ x=ID\ EQ\ e=Expr\ top=toplevel\ \{VarDecl(x,e,top)\}のように書いてしまうことで
-    構文解析ではlet\ a\ =\ 3\ 5やlet\ b\ =\ 4\ trueのような表現も通ってしまうがeval.mlでの構文木解釈時にエラーを出力するので実用上は問題ない。
-    この 新たに追加した文法規則のデータ型をprogram型のVarDeclとしてid型、exp型、program型の値の情報を持つようにsyntax.mlで定義する。
-    eval.mlの解釈部においてはeval\_declでこの宣言を評価できるようにする。
-    VarDeclとともにVarDecl (id ,e, top)のtopの部分もprogram型なのでまずexp型のeをeval\_expで評価してその値をidで束縛し環境に追加、
-    その更新された環境で再び再帰的にeval\_declを呼び出してtopを評価する。
-    こうすることでlet\ a\ =\ 3\ let\ b\ =\ 4;;のような式が正しく評価される。
+\section{Exercise4.3.5}
+\subsection{各プログラムの設計方針}
+  まずは各型付け規則の型推論手続きを与える。
+  \begin{itemize}
+    \item 変数xに対して型付け規則T-VARの型推論の手続きを行う。
+    \begin{enumerate}
+      \item Γ,$x を入力として型推論を行いSと，τ$ を得る。
+      \item $Sとτ$を出力として返す。
+    \end{enumerate}
+  \end{itemize}
+  \begin{itemize}
+    \item 整数nに対して型付け規則T-INTの型推論の手続きを行う。
+    \begin{enumerate}
+      \item Γ,$n$ を入力として型推論を行い空の型代入と，TyInt を得る。
+      \item $\bigl[\ \bigr]$とTyIntを出力として返す。
+    \end{enumerate}
+  \end{itemize}
+  \begin{itemize}
+    \item 真偽値bに対して型付け規則T-BOOLの型推論の手続きを行う。
+    \begin{enumerate}
+      \item Γ,$b を入力として型推論を行いS_1と，τ$を得る。
+      \item 型代入$S_1$ を α = τ という形の方程式の集まりとみなして，$S_1∪\{(τ,TyBool)\} を単一化し，型代入S_2$ を得る
+      \item $S_2$とTyBoolを出力として返す。
+    \end{enumerate}
+  \end{itemize}
+  \begin{itemize}
+    \item 式$e_1*e_2$に対して型付け規則T-MULTの型推論の手続きを行う。
+    \begin{enumerate}
+      \item Γ,$e_1 を入力として型推論を行いS_1と，τ_1$を得る。
+      \item Γ,$e_2 を入力として型推論を行いS_2と，τ_2$を得る。
+      \item 型代入$S_1,S_2$ を α = τ という形の方程式の集まりとみなして，$S_1∪S_2∪\{(τ_1,TyInt),(τ_2,TyInt)\} を単一化し，型代入S_3$ を得る
+      \item $S_3$とTyIntを出力として返す。
+    \end{enumerate}
+  \end{itemize}
+  \begin{itemize}
+    \item 式$e_1 <e_2$に対して型付け規則T-LTの型推論の手続きを行う。
+    \begin{enumerate}
+      \item Γ,$e_1 を入力として型推論を行いS_1と，τ_1$を得る。
+      \item Γ,$e_2 を入力として型推論を行いS_2と，τ_2$を得る。
+      \item 型代入$S_1,S_2$ を α = τ という形の方程式の集まりとみなして，$S_1∪S_2∪\{(τ_1,TyInt),(τ_2,TyInt)\} を単一化し，型代入S_3$ を得る
+      \item $S_3$とTyBoolを出力として返す。
+    \end{enumerate}
+  \end{itemize}
+  \begin{itemize}
+    \item if文$if\ e_1\ then\ e_2\ else\ e_3$　に対して 型付け規則T-IFの型推論の手続きを行う。
+    \begin{enumerate}
+      \item Γ,$e_1 を入力として型推論を行いS_1と，τ_1$を得る。
+      \item Γ,$e_2 を入力として型推論を行いS_2と，τ_2$を得る。
+      \item Γ,$e_3 を入力として型推論を行いS_3と，τ_3$を得る。
+      \item 型代入$S_1,S_2,S_3$ を α = τ という形の方程式の集まりとみなして，$S_1∪S_2∪S_3∪\{(τ_1,TyBool),(τ_2,τ_3)\} を単一化し，型代入S_3$ を得る
+      \item $S_3とτ_2$を出力として返す。
+    \end{enumerate}
+  \end{itemize}
+  \begin{itemize}
+    \item let文$let\ x\ =\ e_1\ in\ e_2$ に対して型付け規則T-LETの型推論の手続きを行う。
+    \begin{enumerate}
+      \item Γ,$e_1 を入力として型推論を行いS_1と，τ_1$を得る。
+      \item Γ,x:$τ_1,e_2 を入力として型推論を行いS_2と，τ_2$を得る。
+      \item 型代入$S_1,S_2$ を α = τ という形の方程式の集まりとみなして，$S_1∪S_2 を単一化し，型代入S_3$ を得る。
+      \item $S_3とτ_2$を出力として返す。
+    \end{enumerate}
+  \end{itemize}
+  \begin{itemize}
+    \item function式$fun\ x\ ->\ e$ に対して型付け規則T-FUNの型推論の手続きを行う。
+    \begin{enumerate}
+      \item xの型を$τ_1$とする。
+      \item Γ,x:$τ_1,eを入力として型推論を行いSと，τ_2$を得る。
+      \item $SとTyFun(τ_1,τ_2)$を出力として返す。
+    \end{enumerate}
+  \end{itemize}
+  \begin{itemize}
+    \item 関数の適用式$e_1\ e_2$ に対して型付け規則T-APPの型推論の手続きを行う。
+    \begin{enumerate}
+      \item Γ,$e_1を入力として型推論を行いS_1と，τ_1$を得る。
+      \item Γ,$e_2を入力として型推論を行いS_2と，τ_2$を得る。
+      \item $e_1の型をTyFun(τ_3,τ_4)とする。$
+      \item 型代入$S_1,S_2$ を α = τ という形の方程式の集まりとみなして，$S_1∪S_2∪\{(τ_1,TyFun(τ_3,τ_4)),(τ_2,τ_3)\}  を単一化し，型代入S_3$ を得る。
+      \item $S_3とτ_3$を出力として返す。
+    \end{enumerate}
+  \end{itemize}
+  以上の型推論の手続きを実際に実装していく。実装についてはT-PLUS,T-FUN,T-VARはすでに実装してあるので残りの部分を例に倣って埋めていく方針で行う。
+\subsection{実装の詳細/工夫した点}
+  \begin{itemize}
+    \item T-MULT,T-LT,はT-PLUSの場合とほぼ同じでty\_prim関数でその制約と型を返す。その制約の内容は乗算、比較ともにその二項の型はTyIntであるという型代入が必要で返す型は乗算の場合はTyInt、比較の場合はTyBoolを返す。
+    \item T-IFの場合はty\_exp関数の引数がIfExpの時の箇所で実装する。上で記述した型推論の手続きと同様にif文if\ exp1\ then\ exp2\ else\ exp3におけるexp1,exp2,exp3の部分をまずty\_expで再帰的に評価しその結果返ってきた型ty1,ty2,ty3について上と同様の制約を型代入に追加しunifyで単一化し、その型代入と型ty2を返す。
+    \item T-LETの場合もty\_exp関数の引数がLetExpの時の箇所で実装する。上で記述した型推論の手続きと同様にlet文let\ id\ =\ exp1\ in\ exp2におけるexp1部分をまずty\_expで再帰的に評価しその結果返ってきた型ty1で型環境tyenvを拡張する。また同時に返ってきた型代入s1とその拡張した型環境でexp2を評価しその結果返ってきた型代入s2を結合し単一化を行いexp2を評価した型ty2にこの型代入を適用してその型代入と型を返す。
+    \item T-APPの場合もty\_exp関数の引数がAppExpの時の箇所で実装する。関数適用式exp1\ exp2においてまずexp1,exp2の型をty\_expで評価し(s1,ty1)と(s2,ty2)を得る。ここでこの ty1がTyFun型であるという制約を与えるためにfresh\_tyvarを用いて新たな型domty1.domty2を作りdomty1とty2が等しいという型代入とty1とTyFun(domty1,domty2)が等しいという型代入をs1とs2を結合したものに追加して単一化しその型代入と、domoty2にその型代入を適用した型subst\_type\ s4\ domty2を返す。\\\\
+  \end{itemize}
 
-\subsection{Exercise3.3.4}
-    and を使って変数を同時にふたつ以上宣言できるように let 式・宣言 を拡張せよ．\\\\
-    exercise3.3.2のようにletを２つ連続で並べるだけの時はひとつ目の宣言を環境に追加してよかったため簡単だったが今回は
-    andで結ばれた宣言は直前の宣言の束縛を参照しないようにする必要があり、さらにandで結ばれたすべての宣言が終わったあとにそれら一連の宣言の
-    変数の束縛を環境に追加する必要がある。またこの問では宣言と同時にinも用いれるようにする必要があるため、parser.mlyでの文法規則の定義も難しかった。
-    まずparser.mlyにおいてin以下のないlet and letのみの宣言の文法規則をtoplevelの下に追加する。
-    これはLET\ x=ID\ EQ\ e1=Expr\ LETAND\ e2=LetAndExpr\ SEMISEMI\ \{ LetAndDecl(x, e1, e2) \}のように宣言する。
-    このデータ型LetAndDecl (x, e1, e2)はsyntax.mlでid型、exp型、program型の値を持つprogram型の中のLetAndDecl型として定義する。
-    また上の追加した文法規則の中のLetAndExprは新たに定義した文法規則でありこのlet\ -\ and\ let\ -\ の文を実現する文法規則を定義する。
-    次にlet andの式にinがついた文のための文法規則をLetAndInExp :\ LET\ x=ID\ EQ\ e1=Expr\ LETAND\ e2=LetAndExpr\ IN\ e3=Expr\ \{ LetAndInExp((LetAndRecExp(x,e1,e2)),e3) \}
-    として定義する。上と同様にLetAndInExpをprogram型とexp型の値を持つexp型のデータ型としてsyntax.mlで定義する。
-    これらで定義した構文をeval.mlで解釈する。まずLetAndDeclはprogram型なのでeval\_decl関数の中で最初のlet文を評価し変数の束縛を実行するが、その束縛は環境には加えず
-    最初の与えられた環境でふたつ目のand以下のlet宣言を再帰的に再びeval\_declで評価する。この評価で返ってきた環境に最後に最初のlet宣言の束縛を加える。
-    こうすることで各々のlet宣言は互いの宣言の束縛に影響を与えずに評価できなおかつ最後にそれらの宣言の束縛を環境に追加することができる。
-    LetAndInExp((LetAndRecExp(x,e1,e2)),e3)の評価についてはこれはexp型なのでeval\_exp関数で評価を行うがこの LetAndInExp型がもつひとつ目のデータ型LetAndRecExp(x,e1,e2)
-    はeval\_declで評価しそこで返された環境の中でe3をeval\_exp関数で再帰的に評価する。
-    結局eval\_decl関数の中でもeval\_exp関数を呼び出しeva\_exp関数の中でもeval\_decl関数を呼び出しているため相互再帰となっているがこうすることで
-    let\ a=1\ and b=2\ in\ a+bのような式を実現できる。
-    let\ andの式ないで同じ識別子に束縛そしようとする文が現れたらエラーを返す必要があるが、これに関してはeval.ml内でリストの参照を作っておき、
-    let\ andで識別子が束縛されるたびにその識別子の値をそのリストに追加する。そしてlet\ andの再帰的に評価していく中でその評価する式の中の識別子を
-    先ほど定義したリストで検索しもしそのリストに宣言された識別子が含まれていたらエラーを返すようにした。
+\section{Exercise4.3.6}
+\subsection{各プログラムの設計方針}
+  資料に与えられているlet\ rec式の型付け基礎に基づいてその型推論部分を実装する。今まで同様にこの型付け規則を忠実に表現する実装を行えば再現できる。
+\subsection{実装の詳細/工夫した点}
+  let\ rec式let\ rec\ id\ =\ fun exp1 -$>$\ exp2においてまずidの型に対応する関数の型で型環境を拡張する必要があるがこの時点でこの関数の型の内容は分からないので自分で新たにfresh\_tyvarを用いて型変数を二つ用意しその型domty1,domty2を一度そのidに対する型をTyFun(domty1,domty2)として拡張しその環境をnewenv1とする。またparaに関しても同様に今作った型domty2で型環境newenv1を拡張しこの型環境をnewenv2とする。このnewenv1でexp2を、newenv2でexp1をty\_expで評価し(s1, ty1) と(s2, ty2)を得る。
+  このs1とs2を結合しこれにdomty2とty1が等しいという制約を加え単一化しこの型代入と、この型代入をty2に適用した型を返す。
+\\\\
 
+\section{Exercise4.4.1}
+\subsection{各プログラムの設計方針}
+  多相的let 式・宣言ともに扱える型推論アル ゴリズムの実装を完成させる。資料内で実装済みの部分はそこを写経する。資料中に作るべき関数などは書いてあるのでまずはその関数を作りそこから対応部分を変えていく方針で実装した。
 
-\subsection{Exercise3.4.1}
-    ML3 インタプリタを作成し，高階関数が正しく動作するかなどを含めてテ ストせよ．\\\\
-    まずは資料のコードをコピーするが、parser.mlyにおいて文法規則FunExprが未定義なので自分で定義する必要がある。
-    function文はfun\ x\ ->\ x+1のようなかたで書かれるのでFunExprは\ FUN\ e1=ID\ RARROW\ e2=Expr\ \{ FunExp (e1, e2) \}のような形で定義できる。
-    それ以外はすでにテキストのコード内で実装済みである。
+\subsection{実装の詳細/工夫した点}
+  まず関数freevar\_tyの拡張で、型スキームσ を受け取り、σ に自由に出現する（ただし型環境には出現しない）型変数 の集合を計算する関数であるfreevar\_tyscを実装する。まず型スキームの情報の中にその型を束縛した変数の情報がありその自由変数の集合をlstとする。次にその型スキームに含まれるの型の情報をty1としてfreevar\_tyを用いてty1に含まれる自由変数を求めその集合をtyvarlstとする。よって求める集合はこのtyvarlstの集合からlstを引いたものである。ここでlstはlist型で求める集合はMySet型なのでMySet.from\_listを用いて一度lstの型を変更しそこでさ集合を求める。\par
+  この関数を用いてfreevar\_tyenvを定義する。この関数は与えられた型環境の中にある、型スキーム内の束縛されていない自由変数の集合を返すものである。型環境をまずlist型に変換するためにEnvironment.mlでこのenv型からlist型に変換するto\_listを定義しこの引数のtyenvをリストに変換する。次にそのリストについてパターンマッチを行う。空リストの場合はMySet型の空リストを返す。型環境が(\_,tysc)::tl と表せるときはまずそのtyscについて先ほど定義したfreevar\_tyscを用いてその自由変数を求め残りのtlの部分についても同様にこの関数freevar\_tyenvを再帰的に適用する。ここで残りのtlについて再帰的にこの関数を適用する際にこの関数の引数はenv型であるためこのlist型のtlは引数にとれないためここで再びこのtlをenv型に変換する関数.from\_listを定義した。以上で与えられた定義すべき関数の実装は終わりである。\par
+  残りはty\_expの環境を拡張する部分を型スキームで拡張するように変更する。 LetExp (id, exp1, exp2)の部分は今までexp1の型でidを束縛して型環境を拡張していたのを、closureを用いてexp1の型τ と型環境 tyenvとexp1の評価で得た型代入s1 から、条件「α1,...,αn は τ に自由に出現する型変数で s1Γ には自由に出現しない」を満たす型スキーム ∀α1.··· .∀αn.τ を求めその型スキームでidを束縛し環境を拡張するように変更する。FunExp (id, exp)については関数の自分で作った引数の型domty1でidを束縛して型環境を拡張していたが、これを型スキームTyScheme([],domty)で束縛するようにして拡張するように変更した。以上でこの問の実装は終わりでLetRecExpの多相型に対応する型推論の実装は次の演習問題で述べる。
+\\\\
 
-\subsection{Exercise3.4.2}
-    OCaml での「(中置演算子) 」記法をサポートし，プリミティブ演算 を通常の関数と同様に扱えるようにせよ.\\\\
-    問題分例文から(+)のような文字列を関数として認識する必要があることが読み取れる。
-    つまりこの構文が来たらProcV(\_,\_,\_)を返す必要があるとわかる。
-    実装についはまずここまでの問と同様にしてParser.mlyで文法規則\ LPAREN\ PLUS\ RPAREN\  \{ MidPlusExp \}と
-    \ LPAREN\ MULT\ RPAREN\  \{ MidMultExp \}をAExprに追加する。こうすることでこの(*)などを関数として扱った際にこの表現も普通の関数と同様にAppExprで
-    適用できるようになる。次にこのMidMultExpとMidPlusExpをexp型のデータ型としてsyntax.mlで定義する。
-    最後にeval.mlでeval\_expの引数がこの型の時に引数を持ちその和（積）を返す関数をProcV型で返すようにする。
-    実際には適当にidを"x"としてProcVのidとし、この関数閉包ボディの部分は引数yでx+yを返すファンクションとして記した。
-    このようにすることで実装が完了する。
+\section{Exercise4.4.2}
+  \subsection{各プログラムの設計方針}
+    再帰関数を多層型で型推論できるように拡張する。問題文で型付け規則は与えられており、これにそって型推論できるように実装していく。
+  \subsection{実装の詳細/工夫した点}
+    まず上の問題と同様に環境の拡張を型で拡張するのではなくその型スキームで行うようにする。以下具体的に述べる。LetRecExp(id, para, exp1, exp2)においてparaの型をfresh\_varを用いてdomty1とし同様にしてexp1の型をdomty2とする。このとき多層型での型推論を実装する前はまずidをTyFun(domty1,domty2)で束縛して環境を拡張していたのを、TyScheme($\bigl[\bigr]$,(TyFun(domty1,domty2))で束縛して拡張してnewenv1を定義する。paraについて束縛の拡張も同様でparaをdomty1で拡張していたのをTyScheme($\bigl[\bigr]$,domty1)で束縛してnewenv1を拡張するようにする。この環境をnewenv2とする。\par
+    次にこのnewenv2環境下でexp1を評価し(s1,ty1)を得る。またここでdomty2とty1は等しいという制約があるためここで一度これと制約s1を結合し単一化し型代入s5を得る。次にexp2の評価のためにidを多相的なTyFun( domty1,ty1)で束縛して拡張した環境で評価する必要があるのでこのTyFun( domty1,ty1)にs5を適用しこの型、型環境tyenv、型代入s5を引数にclosureを用いて型スキームを得る。この型スキームでidを束縛しtyenvを拡張しえたnewenv3でexp2を評価する。こうして得た型代入s2を今までの型の制約に追加し単一化し最後にty2にこの型代入を適用して得られた型とその型代入を返す。
+\\\\
 
-\subsection{Exercise3.4.4}
-    加算を繰り返して 4 による掛け算を実現しているML3 プログ ラムを改造して，階乗を計算するプログラムを書け．\\\\
-    let\ makemult\ =\ fun\ maker\ ->\ fun\ x\ ->\\
-    \ \ if\ x < 1\ then\ 0 \\
-    \ \ else\ x*(maker\ maker\ (x\ +\ -1))\ in\\
-    let\ times4\ =\ fun\ x\ ->\ makemult\ makemult\ x\ in\\
-    times4\ 3\\
-    もとの4の掛け算を実行するプログラムがtimes4の引数の数だけmakemult\ makemult\ aを呼び出してそのたびに4を加算していくために
-    4の乗算が実行されていたことを理解すると、4を加算していた部分のかわりに引数の値を乗算すればいいことがわかる。
-    そうすることで引数の回数だけ再帰的に関数が呼びだされ階乗が計算される。
-
-\subsection{Exercise3.4.5}
-    インタプリタを改造し， fun の代わりに dfun を使った関数は動的束縛を行うようにせよ．\\\\
-    funとdfunで実装が違う部分は解釈部のeval.expだけなのでparser.mlyとsyntax.mlはfunの実装と同様にするだけで良い。
-    dfunの評価については関数が宣言された際の環境の情報を保持しておく必要がないので新たに環境の情報を保持しない環境閉包DprocVをeval.mlで定義し
-    DFunExp (e1, e2)をeval\_expで評価するときはDProcVを返す。関数適用時はAppExp(exp1,exp2)のなかでexp1がProxVの場合とDProcVの場合でパターンマッチを行い
-    DProcV(id,body)の時はidをexp2の評価結果で束縛しこの関数適用が呼びだされた時の環境を拡張してbodyを評価する。
-    以上でこのdfunの実装は完了する。
-
-\subsection{Exercise3.4.6}
-    以 下のプログラムで， 二箇所の funを dfun (Exercise3.4.5を参照)に置き換えて(4通りのプ ログラムを)実行し，その結果について説明せよ．\\\\
-
-    let\ fact\ =\ fun\ n\ ->\ n + 1\ in\ let\ fact\ =\ fun\ n\ ->\ if\ n < 1\ then\ 1\ else\ n * fact (n + -1)\ in\ fact\ 5\\
-    val\ -\ =\ 25\\
-    最後fact\ 5が呼び出されると直前のfactが5に適用されるが、関数閉包ProcV(id,body,env)のidを5で束縛しbodyを評価する際、このbody内のfactは
-    この関数宣言時の環境にあったlet\ fact\ =\ fun\ n\ →\ n + 1を参照するため5*5が行われ25という結果が出力される。\\\\
-
-    let\ fact\ =\ dfun\ n\ ->\ n + 1\ in\ let\ fact\ =\ fun\ n\ ->\ if\ n < 1\ then\ 1\ else\ n * fact (n + -1)\ in\ fact\ 5\\
-    val\ -\ =\ 25\\
-    上のプログラムと違い、ひとつ目のfactの宣言がdfunになったがこのfact関数はこれが宣言された時の環境に依存しない関数なので
-    この変更はひとつ目のプログラムに変化を与えない。\\\\
-
-    let\ fact\ =\ fun\ n\ ->\ n + 1\ in\ let\ fact\ =\ dfun\ n\ ->\ if\ n < 1\ then\ 1\ else\ n * fact (n + -1)\ in\ fact\ 5\\
-    val\ -\ =\ 120\\
-    最後fact\ 5が呼び出されると直前のfactが5に適用されるが、ふたつ目のfactはdfunで宣言されているためその関数閉包DProcV(id,body)は宣言時の環境の情報を保持しない。
-    したがってこの関数閉包のidを5で束縛しbodyを評価する際の環境には評価時の環境が適用されるため、このbody内のfactは現在のfactが再帰的に呼びだされ
-    階乗を計算できるようになる。\\\\
-
-    let\ fact\ =\ dfun\ n\ ->\ n + 1\ in\ let\ fact\ =\ dfun\ n\ ->\ if\ n < 1\ then\ 1\ else\ n * fact (n + -1)\ in\ fact\ 5\\
-    val\ -\ =\ 120\\
-    ふたつ目のプログラムと同様でひとつ目のfactの宣言のdfun化は出力に影響を及ぼさない。
-
-
-
-
-\subsection{Exercise3.5.1}
-    まずlexer.mllの予約語のところにRECを追加する。次にparser.mlyにおいてまずtokenとしてRECを宣言する。toplevelのところにlet\ recの宣言の文法規則
-    LET\ REC\ f=ID\ EQ\ FUN\ x=ID\ RARROW\ e=Expr\ SEMISEMI\ \{RecDecl(f,x,e)\}を追加する。また宣言以外で用いいられるlet\ recとして
-    LetExprのなかにもLET\ REC\ x=ID\ EQ\ FUN\ y=ID\ RARROW\ e1=Expr\ IN\ e2=Expr\ \{ LetRecExp (x, y, e1, e2) \}の文法規則を追加する。
-    eval\_expは資料中のコードで実装済みであるので最後にeval\_declの引数がRecDecl(f,x,e)の場合を実装する。これはeval\_expとほぼ同じで
-    最後に宣言された再帰関数の識別子とあらたにこの関数の情報を加えた環境とこの関数閉包を返せばよい。
-    以上で再帰関数の実装は終了する。
-
-\subsection{Exercise3.6.5}
-  ここまで与えた構文規則では，OCamlとは異なり，if，let, fun, match 式などの「できるだけ右に延ばして読む」構文が二項演算子の右側に来た場合，括弧が必要 になってしまう．この括弧が必要なくなるような構文規則を与えよ.\\\\
-  最初の定義ではIfExprは文法規則Exprの中にあったが、このIfExprをAeExprの中に入れることで最も優先順位が高い文法規則となりカッコがなくてもこのif節を一つの塊として優先的に解釈してくれる。同様にlet,fun文もAEExprの中に入れることでこの文法規則が優先的に読み出されかっこがなくても使えるようになる。
-
-\subsection{感想}
-    非常に課題の量が多いと思った。必須課題と星5個を終わらすのに対して、発展問題をとききるの難しすぎた。
-    また回答？模範実装例みたいなのがあったら嬉しいと思った。
-    引き続き型推論も頑張っていきたい。
+\section{感想}
+  レポート2までの課題に依存する課題が多かったためレポート２で実装していない部分についての拡張が行えずあまり必須課題以外をすることができなかった。これでしんどかった前期の計算機科学実験が終わると思うと感慨深いものがある。実際cpu実験もインタプリタ作成実験も非常に自分のためになりいい経験になったと思うが、自分の勉強時間が奪われたためもう少し分量が少なくてもいいかなとは思った。今実験ではまわりの友達に助けてもらうことが多く、自分を高めてくれる友達の存在には感謝せざる負えない。
 
 \end{document}
